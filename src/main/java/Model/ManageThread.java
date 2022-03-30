@@ -4,6 +4,9 @@ import View.SimulationView;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -21,8 +24,10 @@ public class ManageThread implements Runnable {
     private List<Client> generatedClients;
     public float averageWaiting;
     private LiveLogView liveLog;
+    private static FileOutputStream stream;
 
-    public ManageThread(LiveLogView liveLog, int nr_clients, int nr_queues, int t_simulation_max, SelectionPolicy selectionPolicy, int min_service, int max_service, int min_arrival, int max_arrival) {
+    public ManageThread(LiveLogView liveLog, int nr_clients, int nr_queues, int t_simulation_max, SelectionPolicy selectionPolicy, int min_service, int max_service, int min_arrival, int max_arrival) throws FileNotFoundException {
+        stream = new FileOutputStream("TP2Results.txt");
         this.liveLog = liveLog;
         this.nr_clients = nr_clients;
         this.nr_queues = nr_queues;
@@ -32,7 +37,7 @@ public class ManageThread implements Runnable {
         this.max_service = max_service;
         this.min_arrival = min_arrival;
         this.max_arrival = max_arrival;
-        scheduler = new Scheduler(liveLog, nr_queues, nr_clients);
+        scheduler = new Scheduler(stream, liveLog, nr_queues, nr_clients);
         generatedClients = Collections.synchronizedList(new ArrayList<Client>());
         generateRandomClients();
         scheduler.changeStrategy(selectionPolicy);
@@ -49,6 +54,7 @@ public class ManageThread implements Runnable {
             generatedClients.add(clientRandom);
         }
         Collections.sort(generatedClients, new ObjectComparator());
+        System.out.println("Clienti generati random:");
         for(Client c : generatedClients) {
             System.out.println(c.getId() +" "+c.getT_arrival() +" "+ c.getT_service());
         }
@@ -68,7 +74,11 @@ public class ManageThread implements Runnable {
             liveLog.setSeconds(Integer.toString(currentTime));
             for (Client c : generatedClients) {
                 if (c.getT_arrival() == currentTime) {
-                    scheduler.dispatchTask(c);
+                    try {
+                        scheduler.dispatchTask(c);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
                     wantedClients.add(c);
                 }
             }
@@ -81,19 +91,26 @@ public class ManageThread implements Runnable {
             }catch(InterruptedException e) {};
         }
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         SimulationView view = new SimulationView();
         view.start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 LiveLogView viewLive = new LiveLogView();
                 System.out.println(view.getNrclientitext() + " " +  view.getNrqueuestext() +" " + view.getNrsimulationtext() +" "+ view.getMinimumservicetimetext() +" "+ view.getMaximumservicetimetext() + " "+ view.getMinimumarrivaltimetext() +" "+ view.getMaximumarrivaltimetext());
-                ManageThread management = new ManageThread(viewLive, view.getNrclientitext(), view.getNrqueuestext(), view.getNrsimulationtext(), view.getSelectionpolicylist(), view.getMinimumservicetimetext(), view.getMaximumservicetimetext(), view.getMinimumarrivaltimetext(), view.getMaximumarrivaltimetext());
+                ManageThread management = null;
+                try {
+                    management = new ManageThread(viewLive, view.getNrclientitext(), view.getNrqueuestext(), view.getNrsimulationtext(), view.getSelectionpolicylist(), view.getMinimumservicetimetext(), view.getMaximumservicetimetext(), view.getMinimumarrivaltimetext(), view.getMaximumarrivaltimetext());
+                } catch (FileNotFoundException ex) {
+                    ex.printStackTrace();
+                }
                 Thread t = new Thread(management);
                 t.start();
                 view.closeWindow();
             }
         });
+        stream.close();
+
     }
 }
 

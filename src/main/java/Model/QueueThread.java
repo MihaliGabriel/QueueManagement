@@ -1,4 +1,8 @@
 package Model;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.*;
@@ -14,8 +18,10 @@ public class QueueThread implements Runnable {
     private int max_clients;
     private String name;
     public LiveLogView logView;
+    private FileOutputStream stream;
 
-    QueueThread(LiveLogView logView, String name, int max_clients) {
+    QueueThread(FileOutputStream stream, LiveLogView logView, String name, int max_clients) {
+        this.stream = stream;
         this.logView = logView;
         waitingPeriod = new AtomicInteger(0);
         clients = new ArrayBlockingQueue<Client>(max_clients);
@@ -28,6 +34,7 @@ public class QueueThread implements Runnable {
     }
 
     public synchronized void run() {
+        PrintStream print = new PrintStream(stream);
         while(true) {
             if (clients.size() > 0) {
                 Client client = clients.element();
@@ -38,6 +45,8 @@ public class QueueThread implements Runnable {
                 }
                 clients.remove(client);
                 logView.addTextArea("Client " + client.toString() + "removed from " + name);
+                print.println("Client " + client.toString() + "removed from " + name);
+
             }
         }
     }
