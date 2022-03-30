@@ -1,0 +1,20 @@
+Client  0 4 5 added in Queue 0
+Client  2 4 5 added in Queue 1
+Client  5 4 3 added in Queue 2
+Client  6 4 4 added in Queue 3
+Client  7 4 5 added in Queue 4
+Client  9 4 5 added in Queue 2
+Client  3 5 3 added in Queue 3
+Client  8 5 5 added in Queue 0
+Client  1 6 3 added in Queue 1
+Client  4 6 4 added in Queue 4
+Client  5 4 3removed from Queue 2
+Client  6 4 4removed from Queue 3
+Client  0 4 5removed from Queue 0
+Client  7 4 5removed from Queue 4
+Client  2 4 5removed from Queue 1
+Client  3 5 3removed from Queue 3
+Client  1 6 3removed from Queue 1
+Client  9 4 5removed from Queue 2
+Client  4 6 4removed from Queue 4
+Client  8 5 5removed from Queue 0
