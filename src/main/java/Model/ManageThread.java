@@ -109,8 +109,9 @@ public class ManageThread implements Runnable {
                 view.closeWindow();
             }
         });
-        stream.close();
-
+        if(stream != null) {
+            stream.close();
+        }
     }
 }
 
